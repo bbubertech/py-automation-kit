@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "autokit"
+version = "0.1.0"
+description = "Building blocks for automation jobs: a Redis job queue, a polite async HTTP client, browser flows and report exports."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Barbaros Büber" }]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+    "redis>=5.0",
+    "beautifulsoup4>=4.12",
+    "openpyxl>=3.1",
+    "reportlab>=4.2",
+    "playwright>=1.45",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "respx>=0.21",
+    "fakeredis>=2.23",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "types-redis",
+]
+
+[project.scripts]
+autokit = "autokit.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/autokit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
