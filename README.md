@@ -28,10 +28,31 @@ pytest
 Settings come from `AUTOKIT_*` environment variables (`AUTOKIT_REDIS_URL`,
 `AUTOKIT_RPS`, `AUTOKIT_LOG_LEVEL`, ...). See `src/autokit/config.py`.
 
+## Job queue
+
+```python
+from autokit.queue import RedisQueue, task
+
+@task("send_report")
+async def send_report(payload: dict) -> None:
+    ...
+
+await RedisQueue(redis).enqueue("send_report", {"week": 48}, max_attempts=5)
+```
+
+```bash
+autokit worker --import myproject.tasks
+```
+
+Jobs move from `ready` to `processing` with an atomic `LMOVE`, so a crashed worker never
+loses one: the worker puts jobs whose visibility deadline passed back on the queue.
+Failures retry with exponential backoff and full jitter; after the last attempt the job
+goes to a dead list with its error. `SIGTERM` lets the current job finish first.
+
 ## Roadmap
 
 - [x] Project setup, CI
-- [ ] Redis job queue and worker with retries
+- [x] Redis job queue and worker with retries
 - [ ] Async HTTP client with rate limiting and retries
 - [ ] Browser flows on Playwright
 - [ ] Scraping pipeline and Excel/PDF reports
